@@ -4,12 +4,21 @@ const SUSPICIOUS_KEYWORDS = ['whatsapp', 'telegram', 'gmail']
 
 function App() {
   const [text, setText] = useState('')
-  const [result, setResult] = useState<'REAL JOB' | 'SUSPICIOUS' | null>(null)
+  const [result, setResult] = useState<'REAL JOB' | 'SUSPICIOUS' | 'UNKNOWN' | null>(null)
+  const [detectedKeywords, setDetectedKeywords] = useState<string[]>([])
 
   const checkText = () => {
+    if (!text.trim()) {
+      setResult('UNKNOWN')
+      setDetectedKeywords([])
+      return
+    }
+
     const lowerText = text.toLowerCase()
-    const isSuspicious = SUSPICIOUS_KEYWORDS.some(keyword => lowerText.includes(keyword))
-    setResult(isSuspicious ? 'SUSPICIOUS' : 'REAL JOB')
+    const found = SUSPICIOUS_KEYWORDS.filter(keyword => lowerText.includes(keyword))
+
+    setDetectedKeywords(found)
+    setResult(found.length > 0 ? 'SUSPICIOUS' : 'REAL JOB')
   }
 
   return (
@@ -25,9 +34,19 @@ function App() {
       <br />
       <button onClick={checkText}>Check</button>
       {result && (
-        <h2 style={{ color: result === 'SUSPICIOUS' ? 'red' : 'green' }}>
+        <h2 style={{ color: result === 'SUSPICIOUS' ? 'red' : result === 'UNKNOWN' ? 'gray' : 'green' }}>
           {result}
         </h2>
+      )}
+      {detectedKeywords.length > 0 && (
+        <div>
+          <p>Detected keywords:</p>
+          <ul>
+            {detectedKeywords.map(keyword => (
+              <li key={keyword}>{keyword}</li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   )
